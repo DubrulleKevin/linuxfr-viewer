@@ -7,11 +7,16 @@ from linuxfr import *
 app = Flask(__name__)
 api = Api(app)
 
-class LinuxFRViewer(Resource):
-    def get(self):
-        return get_depeches_on_page(2)
+class NewsPages(Resource):
+    def get(self, page_id):
+        return get_news_on_page(page_id)
 
-api.add_resource(LinuxFRViewer, '/')
+class News(Resource):
+    def get(self, news_endpoint):
+        return get_news_map(news_endpoint)
+
+api.add_resource(NewsPages, '/news/page/<int:page_id>')
+api.add_resource(News, '/news/<string:news_endpoint>')
 
 
 if __name__ == '__main__':

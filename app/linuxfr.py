@@ -2,35 +2,39 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def get_depeches_on_page(page_number):
-    url = 'https://linuxfr.org/'
-    current_url = '{}?page={}/'.format(url, page_number)
+_linuxfr_url = 'https://linuxfr.org/'
+
+
+def get_news_on_page(page_number):
+    current_url = '{}?page={}/'.format(_linuxfr_url, page_number)
 
     page_soup = BeautifulSoup(requests.get(current_url).text, features='html.parser')
-    depeche_title_tags = [el.find('a') for el in page_soup.find_all('h1', attrs={'itemprop': u'name'})]
+    news_title_tags = [el.find('a') for el in page_soup.find_all('h1', attrs={'itemprop': u'name'})]
 
-    depeche_titles = []
-    for depeche_title_tag in depeche_title_tags:
-        depeche_titles.append({'title': depeche_title_tag.string, 'url': url + depeche_title_tag['href']})
+    news_titles = []
+    for news_title_tag in news_title_tags:
+        news_titles.append({'title': news_title_tag.string, 'url': _linuxfr_url + news_title_tag['href']})
 
-    return depeche_titles
+    return news_titles
 
 
-def get_depeche_map(depeche_url):
-    depeche_map = {}
+def get_news_map(news_endpoint):
+    news_url = _linuxfr_url + '/news/' + news_endpoint
+
+    news_map = {}
     threads_list = []
 
-    depeche_soup = BeautifulSoup(requests.get(depeche_url).text, features='html.parser')
+    news_soup = BeautifulSoup(requests.get(news_url).text, features='html.parser')
 
-    depeche_name = depeche_soup.find('h1', attrs={'itemprop': u'name'}).text
-    depeche_map['name'] = depeche_name
+    news_name = news_soup.find('h1', attrs={'itemprop': u'name'}).text
+    news_map['name'] = news_name
 
-    depeche_body_soup = depeche_soup.find('div', attrs={'itemprop': u'articleBody'})
-    depeche_paragraphs_soup = [el.text for el in depeche_body_soup.find_all('p')]
-    depeche_body = '\n\n'.join(depeche_paragraphs_soup)
-    depeche_map['article'] = depeche_body
+    news_body_soup = news_soup.find('div', attrs={'itemprop': u'articleBody'})
+    news_paragraphs_soup = [el.text for el in news_body_soup.find_all('p')]
+    news_body = '\n\n'.join(news_paragraphs_soup)
+    news_map['article'] = news_body
 
-    threads_soup = depeche_soup.find('ul', attrs={'class': u'threads'})
+    threads_soup = news_soup.find('ul', attrs={'class': u'threads'})
     if threads_soup != None:
         threads_comments_soup = threads_soup.find_all('li', attrs={'class': u'comment'})
         for el in threads_comments_soup:
@@ -47,7 +51,7 @@ def get_depeche_map(depeche_url):
                 'content': content
             })
 
-    depeche_map['threads'] = threads_list
+    news_map['comments'] = threads_list
 
-    return depeche_map
+    return news_map
 
