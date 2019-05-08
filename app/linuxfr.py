@@ -13,13 +13,13 @@ def get_news_on_page(page_number):
 
     news_titles = []
     for news_title_tag in news_title_tags:
-        news_titles.append({'title': news_title_tag.string, 'url': _linuxfr_url + news_title_tag['href']})
+        news_titles.append({'title': news_title_tag.string, 'url': news_title_tag['href']})
 
     return news_titles
 
 
 def get_news_map(news_endpoint):
-    news_url = _linuxfr_url + '/news/' + news_endpoint
+    news_url = _linuxfr_url + 'news/' + news_endpoint
 
     news_map = {}
     threads_list = []
