@@ -17,3 +17,8 @@ def get_news_url(news_page, news_number):
 
 def get_news_content(news_page, news_number):
     return json.loads(requests.get(url + get_news_url(news_page, news_number)).text)
+
+
+#class LinuxFrApi:
+    #self __init__(self, server='localhost', port=5000):
+

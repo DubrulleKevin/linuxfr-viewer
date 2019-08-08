@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 import api
 
 
@@ -18,7 +19,9 @@ class NewsWindow(Toplevel):
             article_text.insert(END, 'Note: {}\n\n'.format(comment['note']))
             article_text.insert(END, comment['content'])
         article_text.config(state=DISABLED)
+        article_text.bind('<Escape>', lambda x: self.destroy())
         article_text.pack(side=LEFT, fill=BOTH, expand=TRUE)
+        article_text.focus_set()
         scroll = Scrollbar(self)
         scroll.pack(side=RIGHT, fill=Y)
         scroll.config(command=article_text.yview)
@@ -29,12 +32,15 @@ class ClientTk(Tk):
     def __init__(self):
         Tk.__init__(self)
         self.title('LinuxFR viewer')
-        self._news_list = Listbox(width=120, height=30)
+        self._news_list = Listbox(self, width=120, height=30)
         self._news_list.config(foreground='white', background='black')
         self._news_list.config(font=("Consolas", 14))
         self._news_list.bind('<Double-1>', lambda x: self._open_news(self._news_list.selection_get()))
         self._news_list.bind('<Return>', lambda x: self._open_news(self._news_list.selection_get()))
+        self._news_list.bind('<Left>', lambda x: self._prev_page())
+        self._news_list.bind('<Right>', lambda x: self._next_page())
         self._news_list.pack(side=TOP, fill=BOTH, expand=TRUE)
+        self._news_list.focus_set()
         self._current_page = 1
         self._fill_news_list_from_page()
         self._prev_btn = Button(text='Previous', command=self._prev_page)
@@ -53,7 +59,10 @@ class ClientTk(Tk):
             if news['title'] == news_title:
                 news_number = i
             i = i + 1
-        NewsWindow(self, api.get_news_content(self._current_page, news_number))
+        try:
+            NewsWindow(self, api.get_news_content(self._current_page, news_number))
+        except Exception as e:
+            messagebox.showerror('Error', 'A error occured while getting news content:\n\n{}'.format(e))
 
     def _prev_page(self):
         if self._current_page > 1:
